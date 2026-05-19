@@ -1,10 +1,13 @@
 services:
   - type: web
     name: inhutani-land
-    runtime: php
+    env: php
     region: singapore
     plan: free
-    buildCommand: composer install --optimize-autoloader --no-dev
+    buildCommand: |
+      composer install --optimize-autoloader --no-dev
+      php artisan key:generate --force
+      php artisan storage:link
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_ENV
@@ -12,20 +15,12 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        generateValue: true
+        value: base64:dummykeyplaceholderthatwillbeoverridden
       - key: APP_NAME
         value: "Inhutani Land Management"
       - key: LOG_CHANNEL
         value: stderr
       - key: DB_CONNECTION
         value: sqlite
-      - key: DB_DATABASE
-        value: /var/data/database.sqlite
       - key: MAIL_MAILER
         value: log
-      - key: APP_URL
-        value: https://inhutani-land.onrender.com
-    disk:
-      name: data
-      mountPath: /var/data
-      sizeGB: 1
