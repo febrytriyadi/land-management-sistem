@@ -40,6 +40,8 @@ RUN touch database/database.sqlite && chmod 666 database/database.sqlite
 
 # Run setup and start server on container start
 CMD php artisan key:generate --force && \
+    touch database/database.sqlite && \
+    chmod 666 database/database.sqlite && \
     php artisan migrate --force && \
     php artisan db:seed --class=DatabaseSeeder --force && \
     echo "✅ Inhutani Land ready on port $PORT" && \
