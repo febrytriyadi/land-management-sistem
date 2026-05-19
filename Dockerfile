@@ -30,10 +30,11 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 
-# Generate APP_KEY and create storage structure
-RUN php artisan key:generate --force && \
-    mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache && \
-    chmod -R 777 storage bootstrap/cache database
+# Prepare Laravel environment
+RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache && \
+    chmod -R 777 storage bootstrap/cache database && \
+    cp .env.example .env && \
+    php artisan key:generate --force
 
 # Create SQLite database if not exists
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite
