@@ -33,14 +33,14 @@ RUN composer install --optimize-autoloader --no-dev --no-interaction
 # Prepare Laravel environment
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache && \
     chmod -R 777 storage bootstrap/cache database && \
-    cp .env.example .env && \
-    php artisan key:generate --force
+    cp .env.example .env
 
 # Create SQLite database if not exists
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite
 
-# Run migrations and seed on container start
-CMD php artisan migrate --force && \
+# Run setup and start server on container start
+CMD php artisan key:generate --force && \
+    php artisan migrate --force && \
     php artisan db:seed --class=DatabaseSeeder --force && \
     echo "✅ Inhutani Land ready on port $PORT" && \
     php artisan serve --host=0.0.0.0 --port=$PORT
