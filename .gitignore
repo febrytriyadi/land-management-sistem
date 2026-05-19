@@ -1,0 +1,13 @@
+/node_modules
+/vendor
+.env
+.DS_Store
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+!/storage/framework/.gitkeep
+!/storage/logs/.gitkeep
+public/hot
+public/storage
+.idea
