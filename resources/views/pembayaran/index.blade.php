@@ -91,38 +91,51 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="badge badge-{{ $p->status }}">{{ str_replace('_',' ',ucfirst($p->status)) }}</span>
+                                <span class="badge badge-{{ $p->status }} whitespace-nowrap">{{ str_replace('_',' ',ucfirst($p->status)) }}</span>
                             </td>
-                            <td>
-                                <div class="flex gap-1.5 justify-center">
-                                    <!-- Tombol Edit -->
+                            <td class="whitespace-nowrap">
+                                <div class="flex gap-1 justify-center items-center">
+                                    <!-- Edit -->
                                     <button type="button"
                                         x-data
                                         x-on:click.prevent="$dispatch('open-modal', {{ $p->id }})"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-[10px] transition-all duration-300 hover:bg-blue-600 hover:text-white active:scale-95 border border-blue-200/40">
-                                        <i class="bi bi-pencil-fill"></i> Edit
+                                        class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center text-xs border border-blue-200/40 shrink-0"
+                                        title="Edit">
+                                        <i class="bi bi-pencil-fill"></i>
                                     </button>
+
                                     @if($p->status!=='lunas')
+                                        <!-- Bayar -->
                                         <button type="button"
                                             x-data
                                             x-on:click.prevent="$dispatch('open-bayar-modal', {{ $p->id }})"
-                                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-[10px] transition-all duration-300 hover:bg-emerald-600 hover:text-white active:scale-95 border border-emerald-200/40">
-                                            <i class="bi bi-check-lg"></i> Bayar
+                                            class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center text-xs border border-emerald-200/40 shrink-0"
+                                            title="Bayar">
+                                            <i class="bi bi-check-lg"></i>
                                         </button>
                                     @else
+                                        <!-- Bukti -->
                                         <a href="{{ route('pembayaran.download-bukti',$p) }}"
-                                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-[10px] transition-all duration-300 hover:bg-emerald-600 hover:text-white active:scale-95 border border-emerald-200/40">
-                                            <i class="bi bi-paperclip"></i> Bukti
+                                            class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center text-xs border border-emerald-200/40 shrink-0"
+                                            title="Download Bukti">
+                                            <i class="bi bi-paperclip"></i>
                                         </a>
                                     @endif
+
+                                    <!-- Invoice -->
                                     <a href="{{ route('pembayaran.invoice',$p) }}" target="_blank"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-[10px] transition-all duration-300 hover:bg-indigo-600 hover:text-white active:scale-95 border border-indigo-200/40">
-                                        <i class="bi bi-file-pdf-fill"></i> Invoice
+                                        class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all flex items-center justify-center text-xs border border-indigo-200/40 shrink-0"
+                                        title="Invoice PDF">
+                                        <i class="bi bi-file-pdf-fill"></i>
                                     </a>
-                                    <form action="{{ route('pembayaran.notifikasi',$p) }}" method="POST">
+
+                                    <!-- Email -->
+                                    <form action="{{ route('pembayaran.notifikasi',$p) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-forest-50 text-forest-700 font-semibold text-[10px] transition-all duration-300 hover:bg-forest-600 hover:text-white active:scale-95 border border-forest-100/30">
-                                            <i class="bi bi-envelope-fill"></i> Email
+                                        <button type="submit"
+                                            class="w-7 h-7 rounded-lg bg-forest-50 text-forest-700 hover:bg-forest-600 hover:text-white transition-all flex items-center justify-center text-xs border border-forest-100/30 shrink-0"
+                                            title="Kirim Email">
+                                            <i class="bi bi-envelope-fill"></i>
                                         </button>
                                     </form>
                                 </div>

@@ -94,7 +94,7 @@
         .table-modern-wrap::-webkit-scrollbar { height: 4px; }
         .table-modern-wrap::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .table-modern-wrap::-webkit-scrollbar-thumb { background: #2D5A27; border-radius: 4px; }
-        .table-modern { width: 100%; border-collapse: collapse; }
+        .table-modern { width: 100%; border-collapse: collapse; min-width: 700px; }
         .table-modern thead { background: linear-gradient(to right, #2D5A27, #1F3F1C); }
         .table-modern thead th { padding: 0.875rem 1rem; text-align: left; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(45,90,39,0.3); }
         .table-modern thead th:first-child { border-radius: 0.75rem 0 0 0; }
