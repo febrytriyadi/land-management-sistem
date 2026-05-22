@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
     Route::put('/pembayaran/{pembayaran}/bayar', [PembayaranController::class, 'bayar'])->name('pembayaran.bayar');
     Route::put('/pembayaran/{pembayaran}', [PembayaranController::class, 'update'])->name('pembayaran.update');
+    Route::get('/pembayaran/{pembayaran}/invoice', [PembayaranController::class, 'invoice'])->name('pembayaran.invoice');
     Route::post('/pembayaran/{pembayaran}/notifikasi', [PembayaranController::class, 'kirimNotifikasi'])->name('pembayaran.notifikasi');
     Route::post('/pembayaran/notifikasi-semua', [PembayaranController::class, 'kirimSemuaNotifikasi'])->name('pembayaran.notifikasi-semua');
 

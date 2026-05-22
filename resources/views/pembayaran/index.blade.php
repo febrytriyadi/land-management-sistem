@@ -110,6 +110,10 @@
                                             </button>
                                         </form>
                                     @endif
+                                    <a href="{{ route('pembayaran.invoice',$p) }}" target="_blank"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-[10px] transition-all duration-300 hover:bg-indigo-600 hover:text-white active:scale-95 border border-indigo-200/40">
+                                        <i class="bi bi-file-pdf-fill"></i> Invoice
+                                    </a>
                                     <form action="{{ route('pembayaran.notifikasi',$p) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-forest-50 text-forest-700 font-semibold text-[10px] transition-all duration-300 hover:bg-forest-600 hover:text-white active:scale-95 border border-forest-100/30">

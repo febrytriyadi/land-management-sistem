@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\Kontrak;
 use App\Mail\TagihanMail;
+use App\Models\Tanah;
+use App\Models\Penyewa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -85,6 +87,12 @@ class PembayaranController extends Controller
         }
 
         return back()->with('success', 'Pembayaran cicilan ke-' . $pembayaran->cicilan_ke . ' berhasil diperbarui.');
+    }
+
+    public function invoice(Pembayaran $pembayaran)
+    {
+        $pembayaran->load('kontrak.tanah', 'kontrak.penyewa');
+        return view('pembayaran.invoice', compact('pembayaran'));
     }
 
     public function kirimNotifikasi(Pembayaran $pembayaran)
