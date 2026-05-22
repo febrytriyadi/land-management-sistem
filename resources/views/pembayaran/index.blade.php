@@ -95,6 +95,13 @@
                             </td>
                             <td>
                                 <div class="flex gap-1.5 justify-center">
+                                    <!-- Tombol Edit -->
+                                    <button type="button"
+                                        x-data
+                                        x-on:click.prevent="$dispatch('open-modal', {{ $p->id }})"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-semibold text-[10px] transition-all duration-300 hover:bg-blue-600 hover:text-white active:scale-95 border border-blue-200/40">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </button>
                                     @if($p->status!=='lunas')
                                         <form action="{{ route('pembayaran.bayar',$p) }}" method="POST">
                                             @csrf @method('PUT')
@@ -123,6 +130,111 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal Edit Pembayaran -->
+    <div x-data="{ open: false, pembayaran: null }"
+         x-on:open-modal.window="pembayaran = {{ $pembayarans->toJson() }}.find(p => p.id === $event.detail); open = true"
+         x-show="open"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-transition.opacity>
+        <!-- Overlay -->
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" x-on:click="open = false"></div>
+        <!-- Modal Card -->
+        <div class="relative w-full max-w-lg animate-scale-in" x-on:click.outside="open = false">
+            <div class="card-premium glass-card p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-display font-bold text-gray-900 flex items-center gap-2">
+                        <i class="bi bi-pencil-fill text-blue-600"></i> Edit Pembayaran
+                    </h3>
+                    <button x-on:click="open = false" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-sm transition-all">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <template x-if="pembayaran">
+                    <form :action="`{{ route('pembayaran.update', '') }}/${pembayaran.id}`" method="POST">
+                        @csrf @method('PUT')
+
+                        <!-- Info Kontrak -->
+                        <div class="bg-forest-50/50 rounded-xl p-3 mb-4 text-xs text-gray-600">
+                            <span class="font-bold" x-text="pembayaran.kontrak?.no_kontrak || '-'"></span> —
+                            <span x-text="pembayaran.kontrak?.tanah?.nama || '-'"></span> —
+                            Cicilan <span x-text="pembayaran.cicilan_ke"></span>/<span x-text="pembayaran.kontrak?.jumlah_cicilan || '?'"></span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Jumlah -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Jumlah (Rp)</label>
+                                <input type="number" name="jumlah" step="0.01" min="0" required
+                                    x-model="pembayaran.jumlah"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                            </div>
+
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Status</label>
+                                <select name="status"
+                                    x-model="pembayaran.status"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                                    <option value="belum_dibayar">Belum Dibayar</option>
+                                    <option value="lunas">Lunas</option>
+                                    <option value="terlambat">Terlambat</option>
+                                </select>
+                            </div>
+
+                            <!-- Jatuh Tempo -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Jatuh Tempo</label>
+                                <input type="date" name="tanggal_jatuh_tempo"
+                                    x-model="pembayaran.tanggal_jatuh_tempo"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                            </div>
+
+                            <!-- Tanggal Bayar -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Tanggal Bayar</label>
+                                <input type="date" name="tanggal_bayar"
+                                    x-model="pembayaran.tanggal_bayar"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                                <p class="text-[9px] text-gray-400 mt-0.5">Kosongkan jika belum bayar</p>
+                            </div>
+
+                            <!-- Metode Pembayaran -->
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Metode Bayar</label>
+                                <input type="text" name="metode_pembayaran"
+                                    x-model="pembayaran.metode_pembayaran"
+                                    placeholder="Transfer Bank, Tunai, dll"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Keterangan -->
+                        <div class="mt-3">
+                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Keterangan</label>
+                            <textarea name="keterangan" rows="2"
+                                x-model="pembayaran.keterangan"
+                                placeholder="Opsional"
+                                class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none resize-none"></textarea>
+                        </div>
+
+                        <div class="flex gap-2 justify-end mt-5">
+                            <button type="button" x-on:click="open = false"
+                                class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-forest-600 hover:bg-forest-700 transition-all shadow-sm">
+                                <i class="bi bi-check-lg"></i> Simpan
+                            </button>
+                        </div>
+                    </form>
+                </template>
+            </div>
         </div>
     </div>
 @endsection

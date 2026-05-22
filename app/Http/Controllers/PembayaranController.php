@@ -40,6 +40,53 @@ class PembayaranController extends Controller
         return back()->with('success', 'Pembayaran cicilan ke-' . $pembayaran->cicilan_ke . ' berhasil dikonfirmasi.');
     }
 
+    public function update(Request $request, Pembayaran $pembayaran)
+    {
+        $request->validate([
+            'jumlah' => 'required|numeric|min:0',
+            'tanggal_jatuh_tempo' => 'nullable|date',
+            'metode_pembayaran' => 'nullable|string|max:100',
+            'status' => 'nullable|in:belum_dibayar,lunas,terlambat',
+            'tanggal_bayar' => 'nullable|date',
+            'keterangan' => 'nullable|string|max:1000',
+        ]);
+
+        $data = $request->only(['jumlah', 'metode_pembayaran', 'keterangan']);
+
+        if ($request->filled('tanggal_jatuh_tempo')) {
+            $data['tanggal_jatuh_tempo'] = $request->tanggal_jatuh_tempo;
+        }
+
+        // Kalau status diubah jadi lunas, set tanggal_bayar
+        if ($request->filled('status')) {
+            $data['status'] = $request->status;
+            if ($request->status === 'lunas' && !$pembayaran->tanggal_bayar) {
+                $data['tanggal_bayar'] = $request->filled('tanggal_bayar')
+                    ? $request->tanggal_bayar
+                    : now()->toDateString();
+            }
+        }
+
+        // Kalau user kirim tanggal_bayar manual
+        if ($request->filled('tanggal_bayar') && $data['status'] ?? $pembayaran->status === 'lunas') {
+            $data['tanggal_bayar'] = $request->tanggal_bayar;
+        }
+
+        $pembayaran->update($data);
+
+        // Update status kontrak jika semua cicilan lunas
+        $kontrak = $pembayaran->kontrak;
+        $sisaBelumLunas = $kontrak->pembayarans()->where('status', '!=', 'lunas')->count();
+        if ($sisaBelumLunas === 0) {
+            $kontrak->update(['status' => 'selesai']);
+        } elseif ($kontrak->status === 'selesai') {
+            // Jika ada yang diubah jadi belum_dibayar, kembalikan status kontrak
+            $kontrak->update(['status' => 'aktif']);
+        }
+
+        return back()->with('success', 'Pembayaran cicilan ke-' . $pembayaran->cicilan_ke . ' berhasil diperbarui.');
+    }
+
     public function kirimNotifikasi(Pembayaran $pembayaran)
     {
         try {
