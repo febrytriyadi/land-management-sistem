@@ -299,7 +299,7 @@
     <script>
     function showModal(type, d) {
         if (type === 'edit') {
-            document.getElementById('editForm').action = '{{ route("pembayaran.update", "") }}/' + d.id;
+            document.getElementById('editForm').action = '/pembayaran/' + d.id;
             document.getElementById('editInfo').innerHTML = '<span class="font-bold">' + d.kontrak + '</span> — ' + d.tanah + ' — Cicilan ' + d.cicilan + '/' + d.total;
             document.getElementById('editJumlah').value = d.jumlah;
             document.getElementById('editStatus').value = d.status;
@@ -309,9 +309,9 @@
             document.getElementById('editKeterangan').value = d.keterangan || '';
             document.getElementById('editModal').style.display = 'flex';
         } else if (type === 'bayar') {
-            document.getElementById('bayarForm').action = '{{ route("pembayaran.bayar", "") }}/' + d.id;
+            document.getElementById('bayarForm').action = '/pembayaran/' + d.id + '/bayar';
             document.getElementById('bayarInfo').innerHTML = '<span class="font-bold">' + d.kontrak + '</span> — ' + d.tanah + ' — Cicilan ' + d.cicilan + '/' + d.total + '<br>Jumlah: <span class="font-bold text-emerald-700">Rp ' + new Intl.NumberFormat('id-ID').format(parseFloat(d.jumlah)) + '</span>';
-            document.getElementById('bayarInvoiceLink').href = '{{ route("pembayaran.invoice", "") }}/' + d.id;
+            document.getElementById('bayarInvoiceLink').href = '/pembayaran/' + d.id + '/invoice';
             document.getElementById('bayarBukti').value = '';
             document.getElementById('bayarSubmit').disabled = true;
             document.getElementById('bayarSubmitText').textContent = 'Upload bukti pembayaran terlebih dahulu';
