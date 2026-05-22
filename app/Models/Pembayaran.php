@@ -11,7 +11,7 @@ class Pembayaran extends Model
 
     protected $fillable = [
         'kontrak_id', 'cicilan_ke', 'jumlah', 'tanggal_jatuh_tempo',
-        'tanggal_bayar', 'status', 'metode_pembayaran', 'keterangan'
+        'tanggal_bayar', 'status', 'metode_pembayaran', 'keterangan', 'bukti_pembayaran'
     ];
 
     protected $casts = [

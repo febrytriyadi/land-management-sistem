@@ -9,6 +9,7 @@ use App\Models\Tanah;
 use App\Models\Penyewa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class PembayaranController extends Controller
 {
@@ -20,16 +21,30 @@ class PembayaranController extends Controller
         return view('pembayaran.index', compact('pembayarans'));
     }
 
-    public function bayar(Pembayaran $pembayaran)
+    public function bayar(Request $request, Pembayaran $pembayaran)
     {
         if ($pembayaran->status === 'lunas') {
             return back()->with('error', 'Pembayaran ini sudah lunas.');
         }
 
+        $request->validate([
+            'metode_pembayaran' => 'required|string|max:100',
+            'tanggal_bayar' => 'required|date',
+            'bukti_pembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'keterangan' => 'nullable|string|max:1000',
+        ]);
+
+        // Upload bukti pembayaran
+        $file = $request->file('bukti_pembayaran');
+        $filename = 'bukti_' . $pembayaran->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('bukti-pembayaran', $filename, 'public');
+
         $pembayaran->update([
             'status' => 'lunas',
-            'tanggal_bayar' => now(),
-            'metode_pembayaran' => 'Transfer Bank',
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'bukti_pembayaran' => $path,
+            'keterangan' => $request->keterangan,
         ]);
 
         // Cek apakah semua cicilan sudah lunas
@@ -39,7 +54,16 @@ class PembayaranController extends Controller
             $kontrak->update(['status' => 'selesai']);
         }
 
-        return back()->with('success', 'Pembayaran cicilan ke-' . $pembayaran->cicilan_ke . ' berhasil dikonfirmasi.');
+        return back()->with('success', 'Pembayaran cicilan ke-' . $pembayaran->cicilan_ke . ' berhasil dikonfirmasi. Invoice dapat diunduh untuk diberikan ke penyewa.');
+    }
+
+    public function downloadBukti(Pembayaran $pembayaran)
+    {
+        if (!$pembayaran->bukti_pembayaran || !Storage::disk('public')->exists($pembayaran->bukti_pembayaran)) {
+            return back()->with('error', 'File bukti pembayaran tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->download($pembayaran->bukti_pembayaran);
     }
 
     public function update(Request $request, Pembayaran $pembayaran)

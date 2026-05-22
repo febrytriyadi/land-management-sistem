@@ -103,12 +103,17 @@
                                         <i class="bi bi-pencil-fill"></i> Edit
                                     </button>
                                     @if($p->status!=='lunas')
-                                        <form action="{{ route('pembayaran.bayar',$p) }}" method="POST">
-                                            @csrf @method('PUT')
-                                            <button type="submit" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-[10px] transition-all duration-300 hover:bg-emerald-600 hover:text-white active:scale-95 border border-emerald-200/40">
-                                                <i class="bi bi-check-lg"></i> Bayar
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                            x-data
+                                            x-on:click.prevent="$dispatch('open-bayar-modal', {{ $p->id }})"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-[10px] transition-all duration-300 hover:bg-emerald-600 hover:text-white active:scale-95 border border-emerald-200/40">
+                                            <i class="bi bi-check-lg"></i> Bayar
+                                        </button>
+                                    @else
+                                        <a href="{{ route('pembayaran.download-bukti',$p) }}"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-semibold text-[10px] transition-all duration-300 hover:bg-emerald-600 hover:text-white active:scale-95 border border-emerald-200/40">
+                                            <i class="bi bi-paperclip"></i> Bukti
+                                        </a>
                                     @endif
                                     <a href="{{ route('pembayaran.invoice',$p) }}" target="_blank"
                                         class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 font-semibold text-[10px] transition-all duration-300 hover:bg-indigo-600 hover:text-white active:scale-95 border border-indigo-200/40">
@@ -236,6 +241,104 @@
                                 <i class="bi bi-check-lg"></i> Simpan
                             </button>
                         </div>
+                    </form>
+                </template>
+            </div>
+        </div>
+    <!-- Modal Bayar Pembayaran -->
+    <div x-data="{ open: false, pembayaran: null, fileSelected: false }"
+         x-on:open-bayar-modal.window="pembayaran = {{ $pembayarans->toJson() }}.find(p => p.id === $event.detail); open = true; fileSelected = false"
+         x-show="open"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         x-transition.opacity>
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" x-on:click="open = false"></div>
+        <div class="relative w-full max-w-md animate-scale-in" x-on:click.outside="open = false">
+            <div class="card-premium glass-card p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-display font-bold text-gray-900 flex items-center gap-2">
+                        <i class="bi bi-check-circle-fill text-emerald-600"></i> Konfirmasi Pembayaran
+                    </h3>
+                    <button x-on:click="open = false" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-sm transition-all">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <template x-if="pembayaran">
+                    <form :action="`{{ route('pembayaran.bayar', '') }}/${pembayaran.id}`" method="POST" enctype="multipart/form-data">
+                        @csrf @method('PUT')
+
+                        <!-- Info -->
+                        <div class="bg-emerald-50/50 rounded-xl p-3 mb-4 text-xs text-gray-600">
+                            <span class="font-bold" x-text="pembayaran.kontrak?.no_kontrak || '-'"></span> —
+                            <span x-text="pembayaran.kontrak?.tanah?.nama || '-'"></span> —
+                            Cicilan <span x-text="pembayaran.cicilan_ke"></span>/<span x-text="pembayaran.kontrak?.jumlah_cicilan || '?'"></span>
+                            <br>
+                            Jumlah: <span class="font-bold text-emerald-700" x-text="'Rp ' + new Intl.NumberFormat('id-ID').format(pembayaran.jumlah)"></span>
+                        </div>
+
+                        <!-- Step 1: Download Invoice -->
+                        <div class="bg-blue-50/60 rounded-xl p-3 mb-3 border border-blue-100">
+                            <p class="text-[11px] font-semibold text-blue-800 mb-2 flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">1</span>
+                                Download Invoice untuk Penyewa
+                            </p>
+                            <a :href="`{{ route('pembayaran.invoice', '') }}/${pembayaran.id}`" target="_blank"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-all shadow-sm">
+                                <i class="bi bi-file-pdf-fill"></i> Download Invoice
+                            </a>
+                            <p class="text-[10px] text-blue-500 mt-1.5">Kirim invoice ini ke penyewa sebagai tagihan</p>
+                        </div>
+
+                        <!-- Step 2: Upload Bukti -->
+                        <div class="bg-amber-50/60 rounded-xl p-3 mb-3 border border-amber-100">
+                            <p class="text-[11px] font-semibold text-amber-800 mb-2 flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-amber-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">2</span>
+                                Upload Bukti Pembayaran dari Penyewa
+                            </p>
+                            <div class="relative">
+                                <input type="file" name="bukti_pembayaran" accept=".jpg,.jpeg,.png,.pdf" required
+                                    x-on:change="fileSelected = $event.target.files.length > 0"
+                                    class="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 transition-all cursor-pointer">
+                            </div>
+                            <p class="text-[10px] text-amber-500 mt-1.5">Format: JPG, PNG, atau PDF. Maks 2MB</p>
+                        </div>
+
+                        <!-- Step 3: Metode & Tanggal -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Metode Bayar</label>
+                                <select name="metode_pembayaran" required
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                                    <option value="Transfer Bank">Transfer Bank</option>
+                                    <option value="Tunai">Tunai</option>
+                                    <option value="QRIS">QRIS</option>
+                                    <option value="Giro">Giro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-500 mb-1">Tgl Bayar</label>
+                                <input type="date" name="tanggal_bayar" required
+                                    value="{{ date('Y-m-d') }}"
+                                    class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Keterangan -->
+                        <div class="mb-4">
+                            <label class="block text-[11px] font-semibold text-gray-500 mb-1">Keterangan (opsional)</label>
+                            <textarea name="keterangan" rows="2" placeholder="Catatan tambahan..."
+                                class="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-forest-500/20 focus:border-forest-500 outline-none resize-none"></textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit"
+                            x-bind:disabled="!fileSelected"
+                            x-bind:class="fileSelected ? 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer shadow-sm' : 'bg-gray-300 cursor-not-allowed'"
+                            class="w-full px-4 py-3 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2">
+                            <i class="bi bi-check-lg"></i>
+                            <span x-text="fileSelected ? 'Konfirmasi Pembayaran' : 'Upload bukti pembayaran terlebih dahulu'"></span>
+                        </button>
                     </form>
                 </template>
             </div>
