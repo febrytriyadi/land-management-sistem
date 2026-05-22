@@ -20,16 +20,53 @@
     </style>
 </head>
 <body class="p-4 sm:p-8">
-    <!-- Tombol Print -->
-    <div class="no-print max-w-3xl mx-auto mb-4 flex justify-between items-center">
+    <!-- Tombol Print & Share -->
+    <div class="no-print max-w-3xl mx-auto mb-4 flex justify-between items-center gap-2 flex-wrap">
         <a href="{{ url()->previous() }}" class="text-xs text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1.5">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
-        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-forest-600 text-white font-semibold text-sm hover:bg-forest-700 transition-all shadow-sm flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Cetak / Simpan PDF
-        </button>
+        <div class="flex gap-2">
+            <button onclick="printInvoice()" class="px-5 py-2.5 rounded-xl bg-forest-600 text-white font-semibold text-sm hover:bg-forest-700 transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Cetak / Simpan PDF
+            </button>
+            <button onclick="shareInvoice()" class="px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-all shadow-sm flex items-center gap-2 cursor-pointer active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                Bagikan
+            </button>
+        </div>
     </div>
+
+    <script>
+    function printInvoice() {
+        if (typeof window.print === 'function') {
+            window.print();
+        } else {
+            alert('Fitur cetak tidak tersedia di browser ini. Gunakan menu "Bagikan" atau screenshot halaman ini.');
+        }
+    }
+
+    function shareInvoice() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Invoice - {{ $pembayaran->kontrak->no_kontrak }}',
+                text: 'Invoice pembayaran sewa tanah PT Inhutani I',
+                url: window.location.href,
+            }).catch(function(e) {
+                if (e.name !== 'AbortError') console.error(e);
+            });
+        } else {
+            // Fallback: copy URL
+            var input = document.createElement('input');
+            input.value = window.location.href;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            alert('Link halaman telah disalin. Bisa kirim via WhatsApp atau email.');
+        }
+    }
+    </script>
 
     <!-- Invoice -->
     @php
